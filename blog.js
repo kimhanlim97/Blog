@@ -15,7 +15,6 @@ app.engine('handlebars', expressHandlebars.engine({
 }))
 app.set('view engine', 'handlebars')
 
-
 app.get('/', handlers.home)
 
 app.get('/detail', handlers.detail)

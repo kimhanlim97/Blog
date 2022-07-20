@@ -4,12 +4,15 @@
   "description": "",
   "main": "blog.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "jest"
   },
   "author": "kimhanlim",
   "license": "ISC",
   "dependencies": {
     "express": "^4.18.1",
     "express-handlebars": "^6.0.6"
+  },
+  "devDependencies": {
+    "jest": "^28.1.3"
   }
 }
