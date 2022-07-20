@@ -4,7 +4,8 @@
   "description": "",
   "main": "blog.js",
   "scripts": {
-    "test": "jest"
+    "test": "jest",
+    "lint": "eslint blog.js lib"
   },
   "author": "kimhanlim",
   "license": "ISC",
@@ -13,6 +14,7 @@
     "express-handlebars": "^6.0.6"
   },
   "devDependencies": {
+    "eslint": "^8.20.0",
     "jest": "^28.1.3",
     "portfinder": "^1.0.28",
     "puppeteer": "^15.4.0"
