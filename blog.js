@@ -1,6 +1,8 @@
 const express = require('express')
 const expressHandlebars = require('express-handlebars')
 
+const handlers = require('./lib/handlers')
+
 const app = express()
 const port = process.env.PORT || 3000
 
@@ -14,28 +16,15 @@ app.engine('handlebars', expressHandlebars.engine({
 app.set('view engine', 'handlebars')
 
 
-app.get('/', (req, res) => {
-    res.render('home')
-})
+app.get('/', handlers.home)
 
-app.get('/detail', (req, res) => {
-    res.render('detail')
-})
+app.get('/detail', handlers.detail)
 
 // custom 404 page
-app.use((req, res) => {
-    res.type('text/plain')
-    res.status(404)
-    res.send('404 - Not Found')
-})
+app.use(handlers.notFound)
 
 // custom 500 page
-app.use((err, req, res, next) => {
-    console.error(err.message)
-    res.type('text/plain')
-    res.status(500)
-    res.send('500 - Server Error')
-})
+app.use(handlers.serverError)
 
 app.listen(port, () => {
     console.log(`Express start on http://localhost:${port}`)
