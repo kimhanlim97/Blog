@@ -18,6 +18,10 @@ app.get('/', (req, res) => {
     res.render('home')
 })
 
+app.get('/detail', (req, res) => {
+    res.render('detail')
+})
+
 // custom 404 page
 app.use((req, res) => {
     res.type('text/plain')
