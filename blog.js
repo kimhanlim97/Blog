@@ -10,10 +10,11 @@ const port = process.env.PORT || 3000
 app.use(express.static(__dirname + '/public'))
 
 // handlebars view engine
-app.engine('handlebars', expressHandlebars.engine({
-    defaultlayout: 'main'
+app.engine('.hbs', expressHandlebars.engine({
+    defaultlayout: 'main',
+    extname: '.hbs'
 }))
-app.set('view engine', 'handlebars')
+app.set('view engine', '.hbs')
 
 app.get('/', handlers.home)
 
