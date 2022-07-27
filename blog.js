@@ -1,7 +1,7 @@
 const express = require('express')
 const expressHandlebars = require('express-handlebars')
 
-const handlers = require('./lib/handlers')
+const handlers = require('./lib/errorHandlers')
 
 const app = express()
 const port = process.env.PORT || 3000
@@ -16,9 +16,37 @@ app.engine('.hbs', expressHandlebars.engine({
 }))
 app.set('view engine', '.hbs')
 
-app.get('/', handlers.home)
+app.get('/', (req, res) => {
+    res.render('home')
+})
 
-app.get('/detail', handlers.detail)
+app.get('/write', (req, res) => {
+    res.render('write')
+})
+
+app.get('/read', (req, res) => {
+    const title = 'temp title'
+    const author = 'temp author'
+    const mainText = 'temp main text'
+
+    res.render('read', {
+        title: title,
+        author: author,
+        mainText: mainText
+    })
+})
+
+app.get('/update', (req, res) => {
+    const title = 'temp title'
+    const author = 'temp author'
+    const mainText = 'temp main text'
+    
+    res.render('update', {
+        title: title,
+        author: author,
+        mainText: mainText
+    })
+})
 
 // custom 404 page
 app.use(handlers.notFound)
