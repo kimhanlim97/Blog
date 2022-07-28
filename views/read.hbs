@@ -1,5 +1,8 @@
-<h1>Title: {{title}}</h1>
-<p>Author: {{author}}</p>
-<p>Main Text: {{mainText}}</p>
-<p><a href="/update">update</a></p>
-{{> delete}}
+<h1>Title: {{post.title}}</h1>
+<p>Author: {{post.author}}</p>
+<p>Main Text: {{post.main-text}}</p>
+<p><a href="/admin/update/{{post.identifier}}">update</a></p>
+<form action="/admin/delete" method="POST">
+    <input type="hidden" name="identifier" value="{{post.identifier}}">
+    <input type="submit" value="delete">
+</form>

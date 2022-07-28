@@ -1,7 +1,9 @@
 const express = require('express')
 const expressHandlebars = require('express-handlebars')
+const bodyParser = require('body-parser')
 
 const handlers = require('./lib/errorHandlers')
+const postDataController = require('./lib/postDataControl')
 
 const app = express()
 const port = process.env.PORT || 3000
@@ -16,36 +18,55 @@ app.engine('.hbs', expressHandlebars.engine({
 }))
 app.set('view engine', '.hbs')
 
+// body-parser
+app.use(bodyParser.urlencoded({extended: true}))
+
+// general route
 app.get('/', (req, res) => {
-    res.render('home')
+    const arrangedPosts = postDataController.readDataList()
+
+    res.render('home', {
+        posts: arrangedPosts
+    })
 })
 
-app.get('/write', (req, res) => {
+app.get('/:identifier', (req, res) => {
+    const selectedPost = postDataController.readData(req.params.identifier)
+
+    res.render('read', {
+        post: selectedPost
+    })
+})
+
+// admin route
+app.get('/admin/write', (req, res) => {
     res.render('write')
 })
 
-app.get('/read', (req, res) => {
-    const title = 'temp title'
-    const author = 'temp author'
-    const mainText = 'temp main text'
+app.post('/admin/write', (req, res) => {
+    // postDataController.saveData는 폼 전송된 정보를 data/post.json에 저장한 뒤 생성한 identifier를 리턴함
+    const newPostIdentifier = postDataController.saveData(req.body)
+    res.redirect(303, `/${newPostIdentifier}`)
+})
 
-    res.render('read', {
-        title: title,
-        author: author,
-        mainText: mainText
+app.get('/admin/update/:identifier', (req, res) => {
+    const selectedPost = postDataController.updateDataRendering(req.params.identifier)
+    
+    res.render('update', {
+        post: selectedPost
     })
 })
 
-app.get('/update', (req, res) => {
-    const title = 'temp title'
-    const author = 'temp author'
-    const mainText = 'temp main text'
+app.post('/admin/update/:identifier', (req, res) => {
+    postDataController.updateData(req.params.identifier, req.body)
     
-    res.render('update', {
-        title: title,
-        author: author,
-        mainText: mainText
-    })
+    res.redirect(303, `/${req.params.identifier}`)
+})
+
+app.post('/admin/delete', (req, res) => {
+    postDataController.deleteData(req.body.identifier)
+
+    res.redirect(303, '/')
 })
 
 // custom 404 page

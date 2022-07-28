@@ -1,7 +1,10 @@
 <h1>Welcome to Blog</h1>
 <div>
-    <a href="/write" data-test-id="write">write</a>
+    <a href="/admin/write" data-test-id="write">write</a>
 </div>
-<div>
-    <a href="/read">read</a>
-</div>
+
+<ul>
+    {{#each posts}}
+        <li><a href="/{{identifier}}">{{title}}</a></li>
+    {{/each}}
+</ul>
