@@ -1,18 +1,13 @@
 const express = require('express')
 const expressHandlebars = require('express-handlebars')
 const bodyParser = require('body-parser')
-const fs = require('fs')
+const cookieParser = require('cookie-parser')
+const expressSession = require('express-session')
 
 const handlers = require('./lib/errorHandlers')
 const postDataController = require('./lib/postDataControl')
-// 관리자 로그인 아이디와 비밀번호가 저장되어있는 credentials~.js 파일을 임포트함
-let credentials
-if (fs.existsSync(__dirname + '/credentials.js')) {
-    credentials = require('./credentials.js')
-} 
-else {
-    credentials = require('./credentials~.js')
-}
+const admin = require('./lib/admin')
+
 
 const app = express()
 const port = process.env.PORT || 3000
@@ -29,6 +24,13 @@ app.set('view engine', '.hbs')
 
 // body-parser
 app.use(bodyParser.urlencoded({extended: true}))
+
+app.use(cookieParser())
+app.use(expressSession({
+    resave: false,
+    saveUninitialized: false,
+    secret: 'secret'
+}))
 
 // general route
 app.get('/', (req, res) => {
@@ -53,17 +55,7 @@ app.get('/admin/login', (req, res) => {
 })
 
 app.post('/admin/login', (req, res) => {
-    if (req.body.adminId === credentials.adminId) {
-        if (req.body.adminPw === credentials.adminPw) {
-            console.log('Success')
-        }
-        else {
-            console.log('failure - wrong pw')
-        }
-    }
-    else {
-        console.log('failure - wrong id')
-    }
+    admin.validate(req.body.id, req.body.pw)
     res.redirect(303, '/')
 })
 

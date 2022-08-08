@@ -2,5 +2,5 @@ node_modules
 *~
 .DS_Store
 coverage
-data/post.json
+data
 credentials.js
