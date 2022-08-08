@@ -4,6 +4,7 @@ const bodyParser = require('body-parser')
 
 const handlers = require('./lib/errorHandlers')
 const postDataController = require('./lib/postDataControl')
+const { redirect } = require('express/lib/response')
 
 const app = express()
 const port = process.env.PORT || 3000
@@ -39,6 +40,15 @@ app.get('/:identifier', (req, res) => {
 })
 
 // admin route
+app.get('/admin/login', (req, res) => {
+    res.render('login')
+})
+
+app.post('/admin/login', (req, res) => {
+    console.log(req.body)
+    res.redirect(303, '/')
+})
+
 app.get('/admin/write', (req, res) => {
     res.render('write')
 })
