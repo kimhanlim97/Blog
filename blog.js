@@ -7,6 +7,7 @@ const expressSession = require('express-session')
 const handlers = require('./lib/errorHandlers')
 const postDataController = require('./lib/postDataControl')
 const admin = require('./lib/admin')
+const flashMiddleware = require('./lib/middleware/flash')
 
 
 const app = express()
@@ -32,6 +33,8 @@ app.use(expressSession({
     secret: 'secret'
 }))
 
+app.use(flashMiddleware)
+
 // general route
 app.get('/', (req, res) => {
     const arrangedPosts = postDataController.readDataList()
@@ -55,8 +58,28 @@ app.get('/admin/login', (req, res) => {
 })
 
 app.post('/admin/login', (req, res) => {
-    admin.validate(req.body.id, req.body.pw)
-    res.redirect(303, '/')
+    const checkAdmin = admin.validate(req.body.adminId, req.body.adminPw)
+
+    switch (checkAdmin) {
+        case 'Success':
+            req.session.isAdmin = true
+            res.redirect(303, '/')
+            break
+        case 'Failure - wrong id':
+            req.session.flash = {
+                intro: '틀린 아이디를 입력하셨습니다',
+                message: '올바른 아이디를 입력하세요'
+            }
+            res.redirect(303, '/admin/login')
+            break
+        case 'Failure - wrong pw':
+            req.session.flash = {
+                intro: '틀린 비밀번호를 입력하셨습니다',
+                message: '올바른 비밀번호를 입력하세요'
+            }
+            res.redirect(303, '/admin/login')
+            break
+    }    
 })
 
 app.get('/admin/write', (req, res) => {

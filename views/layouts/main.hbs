@@ -5,6 +5,12 @@
         <link rel="icon" href="/img/logo.png">
     </head>
     <body>
+        {{#if flash}}
+            <div>
+                <h3>{{flash.intro}}</h3>
+                <p>{{flash.message}}</p>
+            </div>
+        {{/if}}
         {{{body}}}
     </body>
 </html>
