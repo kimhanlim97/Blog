@@ -1,10 +1,18 @@
 const express = require('express')
 const expressHandlebars = require('express-handlebars')
 const bodyParser = require('body-parser')
+const fs = require('fs')
 
 const handlers = require('./lib/errorHandlers')
 const postDataController = require('./lib/postDataControl')
-const { redirect } = require('express/lib/response')
+// 관리자 로그인 아이디와 비밀번호가 저장되어있는 credentials~.js 파일을 임포트함
+let credentials
+if (fs.existsSync(__dirname + '/credentials.js')) {
+    credentials = require('./credentials.js')
+} 
+else {
+    credentials = require('./credentials~.js')
+}
 
 const app = express()
 const port = process.env.PORT || 3000
@@ -45,7 +53,17 @@ app.get('/admin/login', (req, res) => {
 })
 
 app.post('/admin/login', (req, res) => {
-    console.log(req.body)
+    if (req.body.adminId === credentials.adminId) {
+        if (req.body.adminPw === credentials.adminPw) {
+            console.log('Success')
+        }
+        else {
+            console.log('failure - wrong pw')
+        }
+    }
+    else {
+        console.log('failure - wrong id')
+    }
     res.redirect(303, '/')
 })
 
