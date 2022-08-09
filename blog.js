@@ -9,7 +9,6 @@ const postDataController = require('./lib/postDataControl')
 const admin = require('./lib/admin')
 const flashMiddleware = require('./lib/middleware/flash')
 
-
 const app = express()
 const port = process.env.PORT || 3000
 
@@ -39,22 +38,38 @@ app.use(flashMiddleware)
 app.get('/', (req, res) => {
     const arrangedPosts = postDataController.readDataList()
 
-    res.render('home', {
+    res.render('userHome', {
         posts: arrangedPosts
     })
 })
 
-app.get('/:identifier', (req, res) => {
+app.get('/read/:identifier', (req, res) => {
     const selectedPost = postDataController.readData(req.params.identifier)
 
-    res.render('read', {
+    res.render('userRead', {
         post: selectedPost
     })
 })
 
 // admin route
+app.get('/admin', (req, res) => {
+    const arrangedPosts = postDataController.readDataList()
+
+    res.render('adminHome', {
+        posts: arrangedPosts
+    })
+})
+
+app.get('/admin/read/:identifier', (req, res) => {
+    const selectedPost = postDataController.readData(req.params.identifier)
+
+    res.render('adminRead', {
+        post: selectedPost
+    })
+})
+
 app.get('/admin/login', (req, res) => {
-    res.render('login')
+    res.render('adminLogin')
 })
 
 app.post('/admin/login', (req, res) => {
@@ -63,7 +78,7 @@ app.post('/admin/login', (req, res) => {
     switch (checkAdmin) {
         case 'Success':
             req.session.isAdmin = true
-            res.redirect(303, '/')
+            res.redirect(303, '/admin')
             break
         case 'Failure - wrong id':
             req.session.flash = {
@@ -83,19 +98,19 @@ app.post('/admin/login', (req, res) => {
 })
 
 app.get('/admin/write', (req, res) => {
-    res.render('write')
+    res.render('adminWrite')
 })
 
 app.post('/admin/write', (req, res) => {
     // postDataController.saveData는 폼 전송된 정보를 data/post.json에 저장한 뒤 생성한 identifier를 리턴함
     const newPostIdentifier = postDataController.saveData(req.body)
-    res.redirect(303, `/${newPostIdentifier}`)
+    res.redirect(303, `/admin/read/${newPostIdentifier}`)
 })
 
 app.get('/admin/update/:identifier', (req, res) => {
     const selectedPost = postDataController.updateDataRendering(req.params.identifier)
     
-    res.render('update', {
+    res.render('adminUpdate', {
         post: selectedPost
     })
 })
@@ -103,19 +118,17 @@ app.get('/admin/update/:identifier', (req, res) => {
 app.post('/admin/update/:identifier', (req, res) => {
     postDataController.updateData(req.params.identifier, req.body)
     
-    res.redirect(303, `/${req.params.identifier}`)
+    res.redirect(303, `/admin/read/${req.params.identifier}`)
 })
 
 app.post('/admin/delete', (req, res) => {
     postDataController.deleteData(req.body.identifier)
 
-    res.redirect(303, '/')
+    res.redirect(303, '/admin')
 })
 
-// custom 404 page
+// custom 404, 500 page
 app.use(handlers.notFound)
-
-// custom 500 page
 app.use(handlers.serverError)
 
 if (require.main === module) {
