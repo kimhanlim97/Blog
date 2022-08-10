@@ -8,6 +8,7 @@ const handlers = require('./lib/errorHandlers')
 const postDataController = require('./lib/postDataControl')
 const admin = require('./lib/admin')
 const flashMiddleware = require('./lib/middleware/flash')
+const adminMiddleware = require('./lib/middleware/admin.js')
 
 const app = express()
 const port = process.env.PORT || 3000
@@ -33,6 +34,7 @@ app.use(expressSession({
 }))
 
 app.use(flashMiddleware)
+app.use('/admin', adminMiddleware.authorize)
 
 // general route
 app.get('/', (req, res) => {
@@ -52,6 +54,35 @@ app.get('/read/:identifier', (req, res) => {
 })
 
 // admin route
+app.get('/login', (req, res) => {
+    res.render('adminLogin')
+})
+
+app.post('/login', (req, res) => {
+    const checkAdmin = admin.validate(req.body.adminId, req.body.adminPw)
+
+    switch (checkAdmin) {
+        case 'Success':
+            req.session.isAdmin = true
+            res.redirect(303, '/admin')
+            break
+        case 'Failure - wrong id':
+            req.session.flash = {
+                intro: '틀린 아이디를 입력하셨습니다',
+                message: '올바른 아이디를 입력하세요'
+            }
+            res.redirect(303, '/login')
+            break
+        case 'Failure - wrong pw':
+            req.session.flash = {
+                intro: '틀린 비밀번호를 입력하셨습니다',
+                message: '올바른 비밀번호를 입력하세요'
+            }
+            res.redirect(303, '/login')
+            break
+    }    
+})
+
 app.get('/admin', (req, res) => {
     const arrangedPosts = postDataController.readDataList()
 
@@ -66,35 +97,6 @@ app.get('/admin/read/:identifier', (req, res) => {
     res.render('adminRead', {
         post: selectedPost
     })
-})
-
-app.get('/admin/login', (req, res) => {
-    res.render('adminLogin')
-})
-
-app.post('/admin/login', (req, res) => {
-    const checkAdmin = admin.validate(req.body.adminId, req.body.adminPw)
-
-    switch (checkAdmin) {
-        case 'Success':
-            req.session.isAdmin = true
-            res.redirect(303, '/admin')
-            break
-        case 'Failure - wrong id':
-            req.session.flash = {
-                intro: '틀린 아이디를 입력하셨습니다',
-                message: '올바른 아이디를 입력하세요'
-            }
-            res.redirect(303, '/admin/login')
-            break
-        case 'Failure - wrong pw':
-            req.session.flash = {
-                intro: '틀린 비밀번호를 입력하셨습니다',
-                message: '올바른 비밀번호를 입력하세요'
-            }
-            res.redirect(303, '/admin/login')
-            break
-    }    
 })
 
 app.get('/admin/write', (req, res) => {
