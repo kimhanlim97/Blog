@@ -1,3 +1,6 @@
+{{#if isAdmin}}
+    {{> adminLogout}}
+{{/if}}
 <form action="/admin/update/{{post.identifier}}" method="POST">
     <p>
         <input type="text" name="title" value="{{post.title}}">

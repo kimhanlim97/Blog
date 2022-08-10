@@ -35,6 +35,7 @@ app.use(expressSession({
 
 app.use(flashMiddleware)
 app.use('/admin', adminMiddleware.authorize)
+app.use('/admin', adminMiddleware.logoutView)
 
 // general route
 app.get('/', (req, res) => {
@@ -64,6 +65,7 @@ app.post('/login', (req, res) => {
     switch (checkAdmin) {
         case 'Success':
             req.session.isAdmin = true
+            res.locals.isAdmin = req.session.isAdmin
             res.redirect(303, '/admin')
             break
         case 'Failure - wrong id':
@@ -81,6 +83,11 @@ app.post('/login', (req, res) => {
             res.redirect(303, '/login')
             break
     }    
+})
+
+app.post('/admin/logout', (req, res) => {
+    delete req.session.isAdmin
+    res.redirect(303, '/')
 })
 
 app.get('/admin', (req, res) => {

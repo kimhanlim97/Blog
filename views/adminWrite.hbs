@@ -1,3 +1,6 @@
+{{#if isAdmin}}
+    {{> adminLogout}}
+{{/if}}
 <form action="/admin/write" method="POST">
     <p>
         <label for="title">Title</label>

@@ -1,3 +1,6 @@
+{{#if isAdmin}}
+    {{> adminLogout}}
+{{/if}}
 <h1>Title: {{post.title}}</h1>
 <p>Author: {{post.author}}</p>
 <p>Main Text: {{post.main-text}}</p>
