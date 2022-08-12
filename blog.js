@@ -48,8 +48,7 @@ app.get('/', (req, res) => {
 
 app.get('/read/:identifier', (req, res) => {
     const selectedPost = postDataController.readData(req.params.identifier)
-    // 임시 댓글 목록
-    const commentList = [{time: '22-08-12 00:00:00', author:"kimhanlim", comment: 'test1'}, {time: '22-08-12 00:00:10', author: "kimhanlim", comment: 'test2'}]
+    const commentList = selectedPost.comment
 
     res.render('userRead', {
         post: selectedPost,
@@ -58,7 +57,13 @@ app.get('/read/:identifier', (req, res) => {
 })
 
 app.post('/read/:identifier', (req, res) => {
-    console.log(req.body)
+    const comment = req.body
+    const selectedPost = postDataController.readData(req.params.identifier)
+
+    if (selectedPost.comment) selectedPost.comment.push(comment)
+    else selectedPost.comment = [comment]
+
+    postDataController.updateData(req.params.identifier, selectedPost)
 
     res.redirect(`/read/${req.params.identifier}`)
 })
