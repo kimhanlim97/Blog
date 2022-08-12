@@ -2,7 +2,7 @@
 <p>Author: {{post.author}}</p>
 <p>Main Text: {{post.main-text}}</p>
 
-<form action="/read/{{post.identifier}}" method="post">
+<form action="/read/{{post.id}}/createComment" method="post">
     <div>
         <input type="text" name="author" placeholder="작성자를 입력하세요">
         <input type="text" name="comment" placeholder="댓글을 입력하세요">

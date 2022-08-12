@@ -5,7 +5,7 @@ const cookieParser = require('cookie-parser')
 const expressSession = require('express-session')
 
 const handlers = require('./lib/errorHandlers')
-const postDataController = require('./lib/postDataControl')
+const data = require('./lib/data')
 const admin = require('./lib/admin')
 const flashMiddleware = require('./lib/middleware/flash')
 const adminMiddleware = require('./lib/middleware/admin.js')
@@ -19,7 +19,7 @@ app.use(express.static(__dirname + '/public'))
 // handlebars view engine
 app.engine('.hbs', expressHandlebars.engine({
     defaultlayout: 'main',
-    extname: '.hbs'
+    extname: '.hbs',
 }))
 app.set('view engine', '.hbs')
 
@@ -39,15 +39,16 @@ app.use('/admin', adminMiddleware.logoutView)
 
 // general route
 app.get('/', (req, res) => {
-    const arrangedPosts = postDataController.readDataList()
+    const posts = data.read()
+    const arrangedPosts = Object.keys(posts).map(id => posts[id])
 
     res.render('userHome', {
         posts: arrangedPosts
     })
 })
 
-app.get('/read/:identifier', (req, res) => {
-    const selectedPost = postDataController.readData(req.params.identifier)
+app.get('/read/:postId', (req, res) => {
+    const selectedPost = data.read(req.params.postId)
     const commentList = selectedPost.comment
 
     res.render('userRead', {
@@ -56,17 +57,21 @@ app.get('/read/:identifier', (req, res) => {
     })
 })
 
-app.post('/read/:identifier', (req, res) => {
+app.post('/read/:postId/createComment', (req, res) => {
     const comment = req.body
-    const selectedPost = postDataController.readData(req.params.identifier)
+    comment.commentId = data.getRandomId()
+
+    const selectedPost = data.read(req.params.postId)
 
     if (selectedPost.comment) selectedPost.comment.push(comment)
     else selectedPost.comment = [comment]
 
-    postDataController.updateData(req.params.identifier, selectedPost)
+    data.update(req.params.postId, selectedPost)
 
-    res.redirect(`/read/${req.params.identifier}`)
+    res.redirect(`/read/${req.params.postId}`)
 })
+
+app.get('/read/')
 
 // admin route
 app.get('/login', (req, res) => {
@@ -105,15 +110,16 @@ app.post('/admin/logout', (req, res) => {
 })
 
 app.get('/admin', (req, res) => {
-    const arrangedPosts = postDataController.readDataList()
+    const posts = data.read()
+    const arrangedPosts = Object.keys(posts).map(id => posts[id])
 
     res.render('adminHome', {
         posts: arrangedPosts
     })
 })
 
-app.get('/admin/read/:identifier', (req, res) => {
-    const selectedPost = postDataController.readData(req.params.identifier)
+app.get('/admin/read/:id', (req, res) => {
+    const selectedPost = data.read(req.params.id)
 
     res.render('adminRead', {
         post: selectedPost
@@ -125,27 +131,27 @@ app.get('/admin/write', (req, res) => {
 })
 
 app.post('/admin/write', (req, res) => {
-    // postDataController.saveData는 폼 전송된 정보를 data/post.json에 저장한 뒤 생성한 identifier를 리턴함
-    const newPostIdentifier = postDataController.saveData(req.body)
-    res.redirect(303, `/admin/read/${newPostIdentifier}`)
+    const newPost = data.create(req.body)
+
+    res.redirect(303, `/admin/read/${newPost.id}`)
 })
 
-app.get('/admin/update/:identifier', (req, res) => {
-    const selectedPost = postDataController.updateDataRendering(req.params.identifier)
+app.get('/admin/update/:postId', (req, res) => {
+    const selectedPost = data.read(req.params.postId)
     
     res.render('adminUpdate', {
         post: selectedPost
     })
 })
 
-app.post('/admin/update/:identifier', (req, res) => {
-    postDataController.updateData(req.params.identifier, req.body)
+app.post('/admin/update/:postId', (req, res) => {
+    data.update(req.params.postId, req.body)
     
-    res.redirect(303, `/admin/read/${req.params.identifier}`)
+    res.redirect(303, `/admin/read/${req.params.postId}`)
 })
 
 app.post('/admin/delete', (req, res) => {
-    postDataController.deleteData(req.body.identifier)
+    data.delete(req.body.postId)
 
     res.redirect(303, '/admin')
 })
