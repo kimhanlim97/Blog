@@ -71,7 +71,38 @@ app.post('/read/:postId/createComment', (req, res) => {
     res.redirect(`/read/${req.params.postId}`)
 })
 
-app.get('/read/')
+app.get('/read/:postId/updateComment/:commentId', (req, res) => {
+    const selectedPost = data.read(req.params.postId)
+    const commentList = selectedPost.comment
+    const updateComment = commentList.filter((comment, i, self) => {
+        return comment.commentId === req.params.commentId
+    })
+
+    res.render('userReadUpdateComment', {
+        post: selectedPost,
+        commentList: commentList,
+        updateComment: updateComment[0],
+    })
+})
+
+app.post('/read/:postId/updateComment/:commentId', (req, res) => {
+    const selectedPost = data.read(req.params.postId)
+    const updatedComments = selectedPost.comment.map((item) => {
+        if (item.commentId === req.params.commentId) {
+            const newComment = req.body
+            newComment.commentId = req.params.commentId
+
+            return newComment
+        } else {
+            return item
+        }
+    })
+    selectedPost.comment = updatedComments
+    
+    data.update(req.params.postId, selectedPost)
+
+    res.redirect(303, `/read/${req.params.postId}`)
+})
 
 // admin route
 app.get('/login', (req, res) => {

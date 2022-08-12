@@ -2,6 +2,7 @@
 <p>Author: {{post.author}}</p>
 <p>Main Text: {{post.main-text}}</p>
 
+
 <form action="/read/{{post.id}}/createComment" method="post">
     <div>
         <input type="text" name="author" placeholder="작성자를 입력하세요">
@@ -13,7 +14,8 @@
 <ul>
     {{#each commentList}}
         <li>
-            <p>{{this.author}}: {{this.comment}}</p>
+            <p>{{this.author}}: {{this.comment}}   <a href="/read/{{../post.id}}/updateComment/{{this.commentId}}">수정하기</a></p>
         </li>
     {{/each}}
 </ul>
+
