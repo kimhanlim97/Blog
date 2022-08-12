@@ -48,10 +48,19 @@ app.get('/', (req, res) => {
 
 app.get('/read/:identifier', (req, res) => {
     const selectedPost = postDataController.readData(req.params.identifier)
+    // 임시 댓글 목록
+    const commentList = [{time: '22-08-12 00:00:00', author:"kimhanlim", comment: 'test1'}, {time: '22-08-12 00:00:10', author: "kimhanlim", comment: 'test2'}]
 
     res.render('userRead', {
-        post: selectedPost
+        post: selectedPost,
+        commentList: commentList
     })
+})
+
+app.post('/read/:identifier', (req, res) => {
+    console.log(req.body)
+
+    res.redirect(`/read/${req.params.identifier}`)
 })
 
 // admin route
