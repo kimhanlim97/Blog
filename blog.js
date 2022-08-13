@@ -4,7 +4,6 @@ const bodyParser = require('body-parser')
 const cookieParser = require('cookie-parser')
 const expressSession = require('express-session')
 
-const handlers = require('./lib/errorHandlers')
 const data = require('./lib/data')
 const admin = require('./lib/admin')
 const flashMiddleware = require('./lib/middleware/flash')
@@ -42,7 +41,7 @@ app.get('/', (req, res) => {
     const posts = data.read()
     const arrangedPosts = Object.keys(posts).map(id => posts[id])
 
-    res.render('userHome', {
+    res.render('user/home', {
         posts: arrangedPosts
     })
 })
@@ -51,7 +50,7 @@ app.get('/read/:postId', (req, res) => {
     const selectedPost = data.read(req.params.postId)
     const commentList = selectedPost.comment
 
-    res.render('userRead', {
+    res.render('user/read', {
         post: selectedPost,
         commentList: commentList
     })
@@ -78,7 +77,7 @@ app.get('/read/:postId/updateComment/:commentId', (req, res) => {
         return comment.commentId === req.params.commentId
     })
 
-    res.render('userReadUpdateComment', {
+    res.render('user/updateComment', {
         post: selectedPost,
         commentList: commentList,
         updateComment: updateComment[0],
@@ -118,7 +117,7 @@ app.post('/read/:postId/deleteComment/:commentId', (req, res) => {
 
 // admin route
 app.get('/login', (req, res) => {
-    res.render('adminLogin')
+    res.render('admin/login')
 })
 
 app.post('/login', (req, res) => {
@@ -156,7 +155,7 @@ app.get('/admin', (req, res) => {
     const posts = data.read()
     const arrangedPosts = Object.keys(posts).map(id => posts[id])
 
-    res.render('adminHome', {
+    res.render('admin/home', {
         posts: arrangedPosts
     })
 })
@@ -164,13 +163,13 @@ app.get('/admin', (req, res) => {
 app.get('/admin/read/:id', (req, res) => {
     const selectedPost = data.read(req.params.id)
 
-    res.render('adminRead', {
+    res.render('admin/read', {
         post: selectedPost
     })
 })
 
 app.get('/admin/write', (req, res) => {
-    res.render('adminWrite')
+    res.render('admin/write')
 })
 
 app.post('/admin/write', (req, res) => {
@@ -182,7 +181,7 @@ app.post('/admin/write', (req, res) => {
 app.get('/admin/update/:postId', (req, res) => {
     const selectedPost = data.read(req.params.postId)
     
-    res.render('adminUpdate', {
+    res.render('admin/update', {
         post: selectedPost
     })
 })
@@ -200,8 +199,14 @@ app.post('/admin/delete', (req, res) => {
 })
 
 // custom 404, 500 page
-app.use(handlers.notFound)
-app.use(handlers.serverError)
+app.use((req, res) => res.render('error/404'))
+
+/* eslint-disable no-unused-vars */
+app.use((err, req, res, next) => {
+    console.log(err)
+    res.render('error/500')
+})
+/* eslint-disable no-unused-vars */
 
 if (require.main === module) {
     app.listen(port, () => {
