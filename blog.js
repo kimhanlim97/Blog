@@ -104,6 +104,18 @@ app.post('/read/:postId/updateComment/:commentId', (req, res) => {
     res.redirect(303, `/read/${req.params.postId}`)
 })
 
+app.post('/read/:postId/deleteComment/:commentId', (req, res) => {
+    const selectedPost = data.read(req.params.postId)
+    const deletedCommentId = selectedPost.comment.findIndex((item) => {
+        return item.commentId === req.params.commentId
+    })
+    selectedPost.comment.splice(deletedCommentId, 1)
+
+    data.update(req.params.postId, selectedPost)
+
+    res.redirect(303, `/read/${req.params.postId}`)
+})
+
 // admin route
 app.get('/login', (req, res) => {
     res.render('adminLogin')
