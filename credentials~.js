@@ -1,4 +1,5 @@
 module.exports = {
     'adminId': '',
-    'adminPw': ''
+    'adminPw': '',
+    'sendgridAPI': '',
 }

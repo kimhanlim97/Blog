@@ -3,11 +3,13 @@ const expressHandlebars = require('express-handlebars')
 const bodyParser = require('body-parser')
 const cookieParser = require('cookie-parser')
 const expressSession = require('express-session')
+const os = require('os')
 
 const data = require('./lib/data')
 const admin = require('./lib/admin')
 const flashMiddleware = require('./lib/middleware/flash')
-const adminMiddleware = require('./lib/middleware/admin.js')
+const adminMiddleware = require('./lib/middleware/admin')
+const sendEmail = require('./lib/email')
 
 const app = express()
 const port = process.env.PORT || 3000
@@ -67,7 +69,18 @@ app.post('/read/:postId/createComment', (req, res) => {
 
     data.update(req.params.postId, selectedPost)
 
-    res.redirect(`/read/${req.params.postId}`)
+    res.render('email/emailTemplate', {
+        layout: null,  
+        subject: selectedPost.title,
+        state: '생성',
+        comment: comment.comment,
+        url: 'http://' + req.hostname + ':3000' + `/read/${req.params.postId}`
+    }, (err, html) => {
+        if (err) console.log(err)
+        
+        sendEmail(`${selectedPost.title}에 변동사항이 있습니다`, html)
+        res.redirect(303, `/read/${req.params.postId}`)
+    })
 })
 
 app.get('/read/:postId/updateComment/:commentId', (req, res) => {
@@ -86,10 +99,14 @@ app.get('/read/:postId/updateComment/:commentId', (req, res) => {
 
 app.post('/read/:postId/updateComment/:commentId', (req, res) => {
     const selectedPost = data.read(req.params.postId)
+    let existingComment
+    let updatedComment
     const updatedComments = selectedPost.comment.map((item) => {
         if (item.commentId === req.params.commentId) {
             const newComment = req.body
             newComment.commentId = req.params.commentId
+            existingComment = item
+            updatedComment = newComment
 
             return newComment
         } else {
@@ -100,19 +117,44 @@ app.post('/read/:postId/updateComment/:commentId', (req, res) => {
     
     data.update(req.params.postId, selectedPost)
 
-    res.redirect(303, `/read/${req.params.postId}`)
+    res.render('email/emailTemplate', {
+        layout: null,  
+        subject: selectedPost.title,
+        state: '수정',
+        comment: existingComment.comment,
+        updatedComment: updatedComment.comment,
+        url: 'http://' + req.hostname + ':3000' + `/read/${req.params.postId}`
+    }, (err, html) => {
+        if (err) console.log(err)
+        
+        sendEmail(`${selectedPost.title}에 변동사항이 있습니다`, html)
+        res.redirect(303, `/read/${req.params.postId}`)
+    })
 })
 
 app.post('/read/:postId/deleteComment/:commentId', (req, res) => {
     const selectedPost = data.read(req.params.postId)
+    let existingComment
     const deletedCommentId = selectedPost.comment.findIndex((item) => {
+        existingComment = item
         return item.commentId === req.params.commentId
     })
     selectedPost.comment.splice(deletedCommentId, 1)
 
     data.update(req.params.postId, selectedPost)
 
-    res.redirect(303, `/read/${req.params.postId}`)
+    res.render('email/emailTemplate', {
+        layout: null,  
+        subject: selectedPost.title,
+        state: '삭제',
+        comment: existingComment.comment,
+        url: 'http://' + req.hostname + ':3000' + `/read/${req.params.postId}`
+    }, (err, html) => {
+        if (err) console.log(err)
+
+        sendEmail(`${selectedPost.title}에 변동사항이 있습니다`, html)
+        res.redirect(303, `/read/${req.params.postId}`)
+    })
 })
 
 // admin route
