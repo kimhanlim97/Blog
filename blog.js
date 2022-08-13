@@ -160,11 +160,13 @@ app.get('/admin', (req, res) => {
     })
 })
 
-app.get('/admin/read/:id', (req, res) => {
-    const selectedPost = data.read(req.params.id)
+app.get('/admin/read/:postId', (req, res) => {
+    const selectedPost = data.read(req.params.postId)
+    const commentList = selectedPost.comment
 
     res.render('admin/read', {
-        post: selectedPost
+        post: selectedPost,
+        commentList: commentList
     })
 })
 

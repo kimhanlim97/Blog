@@ -9,3 +9,16 @@
     <input type="hidden" name="postId" value="{{post.id}}">
     <input type="submit" value="delete">
 </form>
+
+<ul>
+    {{#each commentList}}
+        <li>
+            <p>
+                {{this.author}}: {{this.comment}}
+                <form action="/read/{{../this.post.id}}/deleteComment/{{this.commentId}}" method="post" style="display: inline;">
+                    <input type="submit" value="삭제하기">
+                </form>
+            </p>
+        </li>
+    {{/each}}
+</ul>
