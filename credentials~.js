@@ -1,5 +1,8 @@
 module.exports = {
-    'adminId': '',
-    'adminPw': '',
-    'sendgridAPI': '',
+    adminId: '',
+    adminPw: '',
+    sendgridAPI: '',
+    mongo: {
+        connectionString: ''
+    }
 }

@@ -3,13 +3,12 @@ const expressHandlebars = require('express-handlebars')
 const bodyParser = require('body-parser')
 const cookieParser = require('cookie-parser')
 const expressSession = require('express-session')
-const os = require('os')
 
-const data = require('./lib/data')
 const admin = require('./lib/admin')
 const flashMiddleware = require('./lib/middleware/flash')
 const adminMiddleware = require('./lib/middleware/admin')
 const sendEmail = require('./lib/email')
+const db = require('./db.js')
 
 const app = express()
 const port = process.env.PORT || 3000
@@ -39,121 +38,147 @@ app.use('/admin', adminMiddleware.authorize)
 app.use('/admin', adminMiddleware.logoutView)
 
 // general route
-app.get('/', (req, res) => {
-    const posts = data.read()
-    const arrangedPosts = Object.keys(posts).map(id => posts[id])
+app.get('/', async (req, res) => {
+    const postList = await db.getPostList()
 
-    res.render('user/home', {
-        posts: arrangedPosts
-    })
+    const context = {
+        postList: postList.map(post => {
+            const postForView = {
+                id: post._id,
+                title: post.title
+            }
+            return postForView
+        })
+    }
+
+    res.render('user/home', context)
 })
 
-app.get('/read/:postId', (req, res) => {
-    const selectedPost = data.read(req.params.postId)
-    const commentList = selectedPost.comment
+app.get('/read/:postId', async (req, res) => {
+    const postId = req.params.postId
 
-    res.render('user/read', {
-        post: selectedPost,
-        commentList: commentList
-    })
+    const post = await db.getPost({ _id: postId })
+    const comment = await db.getCommentList({ postId: postId })
+    
+    const context = {
+        post: {
+            id: post._id,
+            title: post.title,
+            author: post.author,
+            mainText: post.mainText,
+        },
+        comment: comment.map(comment => {
+            const commentForView = {
+                author: comment.author,
+                comment: comment.comment,
+                id: comment._id
+            }
+            return commentForView
+        })
+    }
+
+    res.render('user/read', context)
 })
 
-app.post('/read/:postId/createComment', (req, res) => {
+app.post('/read/:postId/createComment', async(req, res) => {
+    const postId = req.params.postId
     const comment = req.body
-    comment.commentId = data.getRandomId()
 
-    const selectedPost = data.read(req.params.postId)
+    const post = await db.getPost({ _id: postId })
+    await db.saveComment(comment, postId)
 
-    if (selectedPost.comment) selectedPost.comment.push(comment)
-    else selectedPost.comment = [comment]
-
-    data.update(req.params.postId, selectedPost)
-
-    res.render('email/emailTemplate', {
+    const emailContext = {
         layout: null,  
-        subject: selectedPost.title,
+        subject: post.title,
         state: '생성',
         comment: comment.comment,
-        url: 'http://' + req.hostname + ':3000' + `/read/${req.params.postId}`
-    }, (err, html) => {
+        url: 'http://' + req.hostname + ':' + port + `/read/${req.params.postId}` 
+    }
+
+    res.render('email/emailTemplate', emailContext, (err, html) => {
         if (err) console.log(err)
         
-        sendEmail(`${selectedPost.title}에 변동사항이 있습니다`, html)
-        res.redirect(303, `/read/${req.params.postId}`)
+        sendEmail(`${post.title}에 변동사항이 있습니다`, html)
+
+        res.redirect(303, `/read/${postId}`)
     })
 })
 
-app.get('/read/:postId/updateComment/:commentId', (req, res) => {
-    const selectedPost = data.read(req.params.postId)
-    const commentList = selectedPost.comment
-    const updateComment = commentList.filter((comment, i, self) => {
-        return comment.commentId === req.params.commentId
-    })
+app.get('/read/:postId/updateComment/:commentId', async (req, res) => {
+    const postId = req.params.postId
+    const updateCommentId = req.params.commentId
 
-    res.render('user/updateComment', {
-        post: selectedPost,
-        commentList: commentList,
-        updateComment: updateComment[0],
-    })
+    const post = await db.getPost({ _id: postId })
+    const commentList = await db.getCommentList({ postId: postId })
+
+    const context = {
+        post: {
+            id: post._id,
+            title: post.title,
+            author: post.author,
+            mainText: post.mainText,
+        },
+        comment: commentList.map(comment => {
+            const commentForView = {
+                id: comment._id.toString(),
+                author: comment.author,
+                comment: comment.comment,
+            }
+            if (commentForView.id === updateCommentId) {
+                commentForView.update = true
+            }
+            return commentForView
+        })
+    }
+
+    res.render('user/updateComment', context)
 })
 
-app.post('/read/:postId/updateComment/:commentId', (req, res) => {
-    const selectedPost = data.read(req.params.postId)
-    let existingComment
-    let updatedComment
-    const updatedComments = selectedPost.comment.map((item) => {
-        if (item.commentId === req.params.commentId) {
-            const newComment = req.body
-            newComment.commentId = req.params.commentId
-            existingComment = item
-            updatedComment = newComment
+app.post('/read/:postId/updateComment/:commentId', async(req, res) => {
+    const postId = req.params.postId
+    const commentId = req.params.commentId
+    const updatedComment = req.body
 
-            return newComment
-        } else {
-            return item
-        }
-    })
-    selectedPost.comment = updatedComments
-    
-    data.update(req.params.postId, selectedPost)
+    const post = await db.getPost({ _id: postId })
+    const previousComment = await db.getPreviousUpdateComment({ _id: commentId }, updatedComment)
 
-    res.render('email/emailTemplate', {
+    const emailContext = {
         layout: null,  
-        subject: selectedPost.title,
+        subject: post.title,
         state: '수정',
-        comment: existingComment.comment,
+        comment: previousComment.comment,
         updatedComment: updatedComment.comment,
-        url: 'http://' + req.hostname + ':3000' + `/read/${req.params.postId}`
-    }, (err, html) => {
+        url: 'http://' + req.hostname + ':' + port + `/read/${postId}`
+    }
+
+    res.render('email/emailTemplate', emailContext, (err, html) => {
         if (err) console.log(err)
         
-        sendEmail(`${selectedPost.title}에 변동사항이 있습니다`, html)
-        res.redirect(303, `/read/${req.params.postId}`)
+        sendEmail(`${post.title}에 변동사항이 있습니다`, html)
+        res.redirect(303, `/read/${postId}`)
     })
 })
 
-app.post('/read/:postId/deleteComment/:commentId', (req, res) => {
-    const selectedPost = data.read(req.params.postId)
-    let existingComment
-    const deletedCommentId = selectedPost.comment.findIndex((item) => {
-        existingComment = item
-        return item.commentId === req.params.commentId
-    })
-    selectedPost.comment.splice(deletedCommentId, 1)
+app.post('/read/:postId/deleteComment/:commentId', async (req, res) => {
+    const postId = req.params.postId
+    const commentId = req.params.commentId
 
-    data.update(req.params.postId, selectedPost)
+    const post = await db.getPost({ _id: postId })
+    const previousComment = db.getPreviousDeleteComment({ _id: commentId })
 
-    res.render('email/emailTemplate', {
+    const emailContext = {
         layout: null,  
-        subject: selectedPost.title,
+        subject: post.title,
         state: '삭제',
-        comment: existingComment.comment,
-        url: 'http://' + req.hostname + ':3000' + `/read/${req.params.postId}`
-    }, (err, html) => {
+        comment: previousComment.comment,
+        url: 'http://' + req.hostname + ':' + port + `/read/${req.params.postId}`
+    }
+
+    res.render('email/emailTemplate', emailContext, (err, html) => {
         if (err) console.log(err)
 
-        sendEmail(`${selectedPost.title}에 변동사항이 있습니다`, html)
-        res.redirect(303, `/read/${req.params.postId}`)
+        sendEmail(`${post.title}에 변동사항이 있습니다`, html)
+        res.redirect(303, `/read/${postId}`)
     })
 })
 
@@ -193,51 +218,82 @@ app.post('/admin/logout', (req, res) => {
     res.redirect(303, '/')
 })
 
-app.get('/admin', (req, res) => {
-    const posts = data.read()
-    const arrangedPosts = Object.keys(posts).map(id => posts[id])
+app.get('/admin', async (req, res) => {
+    const postList = await db.getPostList()
 
-    res.render('admin/home', {
-        posts: arrangedPosts
-    })
+    const context = {
+        postList: postList.map(post => {
+            const postForView = {
+                id: post._id,
+                title: post.title
+            }
+            return postForView
+        })
+    }
+
+    res.render('admin/home', context)
 })
 
-app.get('/admin/read/:postId', (req, res) => {
-    const selectedPost = data.read(req.params.postId)
-    const commentList = selectedPost.comment
+app.get('/admin/read/:postId', async (req, res) => {
+    const postId = req.params.postId
 
-    res.render('admin/read', {
-        post: selectedPost,
-        commentList: commentList
-    })
+    const post = await db.getPost({ _id: req.params.postId })
+    const commentList = await db.getCommentList({ postId: postId })
+    
+    const context = {
+        post: {
+            id: post._id,
+            title: post.title,
+            author: post.author,
+            mainText: post.mainText,
+        },
+        commentList: commentList.map(comment => {
+            const commentForView = {
+                id: comment._id.toString(),
+                author: comment.author,
+                comment: comment.comment,
+            }
+            return commentForView
+        })
+    }
+
+    res.render('admin/read', context)
 })
 
 app.get('/admin/write', (req, res) => {
     res.render('admin/write')
 })
 
-app.post('/admin/write', (req, res) => {
-    const newPost = data.create(req.body)
+app.post('/admin/write', async (req, res) => {
+    await db.savePost(req.body)
 
-    res.redirect(303, `/admin/read/${newPost.id}`)
+    // res.redirect(303, `/admin/read/${postId}`)
+    res.redirect(303, '/admin')
 })
 
-app.get('/admin/update/:postId', (req, res) => {
-    const selectedPost = data.read(req.params.postId)
+app.get('/admin/update/:postId', async (req, res) => {
+    const post = await db.getPost({ _id: req.params.postId })
     
-    res.render('admin/update', {
-        post: selectedPost
-    })
+    const context = {
+        post: {
+            id: post._id,
+            title: post.title,
+            author: post.author,
+            mainText: post.mainText
+        }
+    }
+
+    res.render('admin/update', context)
 })
 
 app.post('/admin/update/:postId', (req, res) => {
-    data.update(req.params.postId, req.body)
+    db.updatePost({_id: req.params.postId}, req.body)
     
     res.redirect(303, `/admin/read/${req.params.postId}`)
 })
 
 app.post('/admin/delete', (req, res) => {
-    data.delete(req.body.postId)
+    db.deletePost({ _id: req.body.postId })
 
     res.redirect(303, '/admin')
 })

@@ -1,6 +1,6 @@
 <h1>Title: {{post.title}}</h1>
 <p>Author: {{post.author}}</p>
-<p>Main Text: {{post.main-text}}</p>
+<p>Main Text: {{post.mainText}}</p>
 
 
 <form action="/read/{{post.id}}/createComment" method="post">
@@ -12,12 +12,12 @@
 </form>
 
 <ul>
-    {{#each commentList}}
+    {{#each comment}}
         <li>
             <p>
                 {{this.author}}: {{this.comment}}   
-                <a href="/read/{{../post.id}}/updateComment/{{this.commentId}}">수정하기</a>
-                <form action="/read/{{../this.post.id}}/deleteComment/{{this.commentId}}" method="post" style="display: inline;">
+                <a href="/read/{{../post.id}}/updateComment/{{this.id}}">수정하기</a>
+                <form action="/read/{{../this.post.id}}/deleteComment/{{this.id}}" method="post" style="display: inline;">
                     <input type="submit" value="삭제하기">
                 </form>
             </p>

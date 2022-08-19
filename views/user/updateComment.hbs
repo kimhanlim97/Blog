@@ -1,18 +1,19 @@
 <h1>Title: {{post.title}}</h1>
 <p>Author: {{post.author}}</p>
-<p>Main Text: {{post.main-text}}</p>
-
-
-<form action="/read/{{post.id}}/updateComment/{{updateComment.commentId}}" method="POST">
-    <input type="text" name="author" value="{{updateComment.author}}">
-    <input type="text" name="comment" value="{{updateComment.comment}}">
-    <input type="submit" value="수정하기">
-</form>
+<p>Main Text: {{post.mainText}}</p>
 
 <ul>
-    {{#each commentList}}
-        <li>
-            <p>{{this.author}}: {{this.comment}}</p>
-        </li>
+    {{#each comment}}
+        {{#if this.update}}
+            <form action="/read/{{../post.id}}/updateComment/{{./this.id}}" method="POST">
+                <input type="text" name="author" value="{{./this.author}}">
+                <input type="text" name="comment" value="{{./this.comment}}">
+                <input type="submit" value="수정하기">
+            </form>
+        {{else}}
+            <li>
+                <p>{{./this.author}}: {{./this.comment}}</p>
+            </li>
+        {{/if}}
     {{/each}}
 </ul>
