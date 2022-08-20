@@ -3,8 +3,7 @@ const mongoose = require('mongoose')
 const commentSchema = mongoose.Schema({
     author: String,
     comment: String,
-    id: mongoose.Schema.Types.ObjectId,
-    postId: {type: String, required: true}
+    _id: mongoose.Schema.Types.ObjectId,
 })
 
 module.exports = mongoose.model('Comment', commentSchema)

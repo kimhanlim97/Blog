@@ -58,7 +58,7 @@ app.get('/read/:postId', async (req, res) => {
     const postId = req.params.postId
 
     const post = await db.getPost({ _id: postId })
-    const comment = await db.getCommentList({ postId: postId })
+    const commentList = post.comments
     
     const context = {
         post: {
@@ -67,7 +67,7 @@ app.get('/read/:postId', async (req, res) => {
             author: post.author,
             mainText: post.mainText,
         },
-        comment: comment.map(comment => {
+        comment: commentList.map(comment => {
             const commentForView = {
                 author: comment.author,
                 comment: comment.comment,
@@ -85,7 +85,8 @@ app.post('/read/:postId/createComment', async(req, res) => {
     const comment = req.body
 
     const post = await db.getPost({ _id: postId })
-    await db.saveComment(comment, postId)
+    const savedCommentId = await db.saveComment(comment)
+    await db.updatePost({ _id: postId }, { $push: { comments: savedCommentId } })
 
     const emailContext = {
         layout: null,  
@@ -237,8 +238,8 @@ app.get('/admin', async (req, res) => {
 app.get('/admin/read/:postId', async (req, res) => {
     const postId = req.params.postId
 
-    const post = await db.getPost({ _id: req.params.postId })
-    const commentList = await db.getCommentList({ postId: postId })
+    const post = await db.getPost({ _id: postId })
+    const commentList = post.comments
     
     const context = {
         post: {

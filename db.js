@@ -30,7 +30,7 @@ db.once('open', () => console.log('MongoDB connection established'))
 
 module.exports = {
     getPostList: async (options = {}) => Post.find(options),
-    getPost: async (options = {}) => Post.findOne(options),
+    getPost: async (options = {}) => await Post.findOne(options).populate('comments'),
     savePost: async (data) => {
         const newPost = new Post({
             title: data.title,
@@ -41,12 +41,15 @@ module.exports = {
     updatePost: async (options = {}, update = {}) => Post.updateOne(options, update),
     deletePost: async (options = {}) => Post.deleteOne(options),
     getCommentList: async (options = {}) => Comment.find(options),
-    saveComment: async (data, postId) => {
+    saveComment: async (data) => {
         const newComment = new Comment({
+            _id: new mongoose.Types.ObjectId,
             author: data.author,
-            comment: data.comment,
-            postId: postId
-        }).save()
+            comment: data.comment
+        })
+        newComment.save()
+
+        return newComment._id
     },
     getPreviousUpdateComment: async (options = {}, update = {}) => {
         const previousComment = await Comment.findOne(options)
