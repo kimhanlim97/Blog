@@ -41,11 +41,12 @@ module.exports = {
     updatePost: async (options = {}, update = {}) => Post.updateOne(options, update),
     deletePost: async (options = {}) => Post.deleteOne(options),
     getCommentList: async (options = {}) => Comment.find(options),
-    saveComment: async (data) => {
+    saveComment: async (data, postId) => {
         const newComment = new Comment({
             _id: new mongoose.Types.ObjectId,
             author: data.author,
-            comment: data.comment
+            comment: data.comment,
+            post: postId
         })
         newComment.save()
 
@@ -62,5 +63,6 @@ module.exports = {
         await Comment.deleteOne(options)
 
         return previousComment
-    }
+    },
+    deleteComments: async (options = {}) => Comment.deleteMany(options)
 }

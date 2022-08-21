@@ -11,11 +11,11 @@
 </form>
 
 <ul>
-    {{#each commentList}}
+    {{#each comments}}
         <li>
             <p>
-                {{this.author}}: {{this.comment}}
-                <form action="/read/{{../this.post.id}}/deleteComment/{{this.id}}" method="post" style="display: inline;">
+                {{author}}: {{comment}}
+                <form action="/read/{{../post.id}}/deleteComment/{{id}}" method="post" style="display: inline;">
                     <input type="submit" value="삭제하기">
                 </form>
             </p>

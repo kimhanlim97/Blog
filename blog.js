@@ -9,6 +9,7 @@ const flashMiddleware = require('./lib/middleware/flash')
 const adminMiddleware = require('./lib/middleware/admin')
 const sendEmail = require('./lib/email')
 const db = require('./db.js')
+const { getPreviousDeleteComment } = require('./db.js')
 
 const app = express()
 const port = process.env.PORT || 3000
@@ -58,7 +59,7 @@ app.get('/read/:postId', async (req, res) => {
     const postId = req.params.postId
 
     const post = await db.getPost({ _id: postId })
-    const commentList = post.comments
+    const comments = post.comments
     
     const context = {
         post: {
@@ -67,11 +68,11 @@ app.get('/read/:postId', async (req, res) => {
             author: post.author,
             mainText: post.mainText,
         },
-        comment: commentList.map(comment => {
+        comments: comments.map(comment => {
             const commentForView = {
+                id: comment._id,
                 author: comment.author,
                 comment: comment.comment,
-                id: comment._id
             }
             return commentForView
         })
@@ -85,7 +86,7 @@ app.post('/read/:postId/createComment', async(req, res) => {
     const comment = req.body
 
     const post = await db.getPost({ _id: postId })
-    const savedCommentId = await db.saveComment(comment)
+    const savedCommentId = await db.saveComment(comment, postId)
     await db.updatePost({ _id: postId }, { $push: { comments: savedCommentId } })
 
     const emailContext = {
@@ -93,7 +94,7 @@ app.post('/read/:postId/createComment', async(req, res) => {
         subject: post.title,
         state: '생성',
         comment: comment.comment,
-        url: 'http://' + req.hostname + ':' + port + `/read/${req.params.postId}` 
+        url: 'http://' + req.hostname + ':' + port + `/read/${postId}` 
     }
 
     res.render('email/emailTemplate', emailContext, (err, html) => {
@@ -239,7 +240,7 @@ app.get('/admin/read/:postId', async (req, res) => {
     const postId = req.params.postId
 
     const post = await db.getPost({ _id: postId })
-    const commentList = post.comments
+    const comments = post.comments
     
     const context = {
         post: {
@@ -248,7 +249,7 @@ app.get('/admin/read/:postId', async (req, res) => {
             author: post.author,
             mainText: post.mainText,
         },
-        commentList: commentList.map(comment => {
+        comments: comments.map(comment => {
             const commentForView = {
                 id: comment._id.toString(),
                 author: comment.author,
@@ -266,14 +267,17 @@ app.get('/admin/write', (req, res) => {
 })
 
 app.post('/admin/write', async (req, res) => {
-    await db.savePost(req.body)
+    const post = req.body
 
-    // res.redirect(303, `/admin/read/${postId}`)
+    await db.savePost(post)
+
     res.redirect(303, '/admin')
 })
 
 app.get('/admin/update/:postId', async (req, res) => {
-    const post = await db.getPost({ _id: req.params.postId })
+    const postId = req.params.postId
+
+    const post = await db.getPost({ _id: postId })
     
     const context = {
         post: {
@@ -287,14 +291,20 @@ app.get('/admin/update/:postId', async (req, res) => {
     res.render('admin/update', context)
 })
 
-app.post('/admin/update/:postId', (req, res) => {
-    db.updatePost({_id: req.params.postId}, req.body)
+app.post('/admin/update/:postId', async (req, res) => {
+    const postId = req.params.postId
+    const updatedPost = req.body
+
+    await db.updatePost({_id: postId}, updatedPost)
     
-    res.redirect(303, `/admin/read/${req.params.postId}`)
+    res.redirect(303, `/admin/read/${postId}`)
 })
 
-app.post('/admin/delete', (req, res) => {
-    db.deletePost({ _id: req.body.postId })
+app.post('/admin/delete', async (req, res) => {
+    const postId = req.body.postId
+
+    await db.deletePost({ _id: postId })
+    await db.deleteComments({ post: postId })
 
     res.redirect(303, '/admin')
 })

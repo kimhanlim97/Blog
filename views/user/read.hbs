@@ -12,12 +12,12 @@
 </form>
 
 <ul>
-    {{#each comment}}
+    {{#each comments}}
         <li>
             <p>
-                {{this.author}}: {{this.comment}}   
-                <a href="/read/{{../post.id}}/updateComment/{{this.id}}">수정하기</a>
-                <form action="/read/{{../this.post.id}}/deleteComment/{{this.id}}" method="post" style="display: inline;">
+                {{author}}: {{comment}}   
+                <a href="/read/{{../post.id}}/updateComment/{{id}}">수정하기</a>
+                <form action="/read/{{../post.id}}/deleteComment/{{id}}" method="post" style="display: inline;">
                     <input type="submit" value="삭제하기">
                 </form>
             </p>
