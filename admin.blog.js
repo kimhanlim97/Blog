@@ -45,7 +45,6 @@ adminRouter.post('/logout', (req, res) => {
 })
 
 adminRouter.use(adminMiddleware.authorize)
-adminRouter.use(adminMiddleware.logoutView)
 
 adminRouter.get('/', async (req, res) => {
     const postList = await db.getPostList()
