@@ -4,18 +4,18 @@
 <h1>Title: {{post.title}}</h1>
 <p>Author: {{post.author}}</p>
 <p>Main Text: {{post.mainText}}</p>
-<p><a href="/admin/update/{{post.id}}">update</a></p>
-<form action="/admin/delete" method="POST">
+<p><a href="/update/{{post.id}}">update</a></p>
+<form action="/delete" method="POST">
     <input type="hidden" name="postId" value="{{post.id}}">
     <input type="submit" value="delete">
 </form>
 
 <ul>
-    {{#each commentList}}
+    {{#each comments}}
         <li>
             <p>
-                {{this.author}}: {{this.comment}}
-                <form action="/read/{{../this.post.id}}/deleteComment/{{this.id}}" method="post" style="display: inline;">
+                {{author}}: {{comment}}
+                <form action="/read/{{../post.id}}/deleteComment/{{id}}" method="post" style="display: inline;">
                     <input type="submit" value="삭제하기">
                 </form>
             </p>

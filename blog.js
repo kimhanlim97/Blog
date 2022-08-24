@@ -3,12 +3,13 @@ const expressHandlebars = require('express-handlebars')
 const bodyParser = require('body-parser')
 const cookieParser = require('cookie-parser')
 const expressSession = require('express-session')
+const vhost = require('vhost')
 
-const admin = require('./lib/admin')
 const flashMiddleware = require('./lib/middleware/flash')
-const adminMiddleware = require('./lib/middleware/admin')
 const sendEmail = require('./lib/email')
-const db = require('./db.js')
+const db = require('./models/mongoDbLayer.js')
+
+const adminRouter = require('./admin.blog')
 
 const app = express()
 const port = process.env.PORT || 3000
@@ -25,19 +26,16 @@ app.set('view engine', '.hbs')
 
 // body-parser
 app.use(bodyParser.urlencoded({extended: true}))
-
 app.use(cookieParser())
 app.use(expressSession({
     resave: false,
     saveUninitialized: false,
-    secret: 'secret'
+    secret: 'secret',
 }))
 
 app.use(flashMiddleware)
-app.use('/admin', adminMiddleware.authorize)
-app.use('/admin', adminMiddleware.logoutView)
+app.use(vhost('admin.blog.local', adminRouter))
 
-// general route
 app.get('/', async (req, res) => {
     const postList = await db.getPostList()
 
@@ -58,7 +56,7 @@ app.get('/read/:postId', async (req, res) => {
     const postId = req.params.postId
 
     const post = await db.getPost({ _id: postId })
-    const commentList = post.comments
+    const comments = post.comments
     
     const context = {
         post: {
@@ -67,11 +65,11 @@ app.get('/read/:postId', async (req, res) => {
             author: post.author,
             mainText: post.mainText,
         },
-        comment: commentList.map(comment => {
+        comments: comments.map(comment => {
             const commentForView = {
+                id: comment._id,
                 author: comment.author,
                 comment: comment.comment,
-                id: comment._id
             }
             return commentForView
         })
@@ -85,7 +83,7 @@ app.post('/read/:postId/createComment', async(req, res) => {
     const comment = req.body
 
     const post = await db.getPost({ _id: postId })
-    const savedCommentId = await db.saveComment(comment)
+    const savedCommentId = await db.saveComment(comment, postId)
     await db.updatePost({ _id: postId }, { $push: { comments: savedCommentId } })
 
     const emailContext = {
@@ -93,7 +91,7 @@ app.post('/read/:postId/createComment', async(req, res) => {
         subject: post.title,
         state: '생성',
         comment: comment.comment,
-        url: 'http://' + req.hostname + ':' + port + `/read/${req.params.postId}` 
+        url: 'http://' + req.hostname + ':' + port + `/read/${postId}` 
     }
 
     res.render('email/emailTemplate', emailContext, (err, html) => {
@@ -181,122 +179,6 @@ app.post('/read/:postId/deleteComment/:commentId', async (req, res) => {
         sendEmail(`${post.title}에 변동사항이 있습니다`, html)
         res.redirect(303, `/read/${postId}`)
     })
-})
-
-// admin route
-app.get('/login', (req, res) => {
-    res.render('admin/login')
-})
-
-app.post('/login', (req, res) => {
-    const checkAdmin = admin.validate(req.body.adminId, req.body.adminPw)
-
-    switch (checkAdmin) {
-        case 'Success':
-            req.session.isAdmin = true
-            res.locals.isAdmin = req.session.isAdmin
-            res.redirect(303, '/admin')
-            break
-        case 'Failure - wrong id':
-            req.session.flash = {
-                intro: '틀린 아이디를 입력하셨습니다',
-                message: '올바른 아이디를 입력하세요'
-            }
-            res.redirect(303, '/login')
-            break
-        case 'Failure - wrong pw':
-            req.session.flash = {
-                intro: '틀린 비밀번호를 입력하셨습니다',
-                message: '올바른 비밀번호를 입력하세요'
-            }
-            res.redirect(303, '/login')
-            break
-    }    
-})
-
-app.post('/admin/logout', (req, res) => {
-    delete req.session.isAdmin
-    res.redirect(303, '/')
-})
-
-app.get('/admin', async (req, res) => {
-    const postList = await db.getPostList()
-
-    const context = {
-        postList: postList.map(post => {
-            const postForView = {
-                id: post._id,
-                title: post.title
-            }
-            return postForView
-        })
-    }
-
-    res.render('admin/home', context)
-})
-
-app.get('/admin/read/:postId', async (req, res) => {
-    const postId = req.params.postId
-
-    const post = await db.getPost({ _id: postId })
-    const commentList = post.comments
-    
-    const context = {
-        post: {
-            id: post._id,
-            title: post.title,
-            author: post.author,
-            mainText: post.mainText,
-        },
-        commentList: commentList.map(comment => {
-            const commentForView = {
-                id: comment._id.toString(),
-                author: comment.author,
-                comment: comment.comment,
-            }
-            return commentForView
-        })
-    }
-
-    res.render('admin/read', context)
-})
-
-app.get('/admin/write', (req, res) => {
-    res.render('admin/write')
-})
-
-app.post('/admin/write', async (req, res) => {
-    await db.savePost(req.body)
-
-    // res.redirect(303, `/admin/read/${postId}`)
-    res.redirect(303, '/admin')
-})
-
-app.get('/admin/update/:postId', async (req, res) => {
-    const post = await db.getPost({ _id: req.params.postId })
-    
-    const context = {
-        post: {
-            id: post._id,
-            title: post.title,
-            author: post.author,
-            mainText: post.mainText
-        }
-    }
-
-    res.render('admin/update', context)
-})
-
-app.post('/admin/update/:postId', (req, res) => {
-    db.updatePost({_id: req.params.postId}, req.body)
-    
-    res.redirect(303, `/admin/read/${req.params.postId}`)
-})
-
-app.post('/admin/delete', (req, res) => {
-    db.deletePost({ _id: req.body.postId })
-
-    res.redirect(303, '/admin')
 })
 
 // custom 404, 500 page

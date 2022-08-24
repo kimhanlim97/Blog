@@ -1,7 +1,7 @@
 {{#if isAdmin}}
     {{> adminLogout}}
 {{/if}}
-<form action="/admin/update/{{post.id}}" method="POST">
+<form action="/update/{{post.id}}" method="POST">
     <p>
         <input type="text" name="title" value="{{post.title}}">
     </p>
@@ -9,7 +9,7 @@
         <input type="text" name="author" value="{{post.author}}">
     </p>
     <p>
-        <textarea name="main-text" cols="30" rows="10">{{post.mainText}}</textarea>
+        <textarea name="mainText" cols="30" rows="10">{{post.mainText}}</textarea>
     </p>    
     <input type="submit">
 </form>

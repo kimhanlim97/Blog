@@ -2,15 +2,14 @@ const mongoose = require('mongoose')
 const fs = require('fs')
 const path = require('path')
 
-const Post = require('./models/post')
-const Comment = require('./models/comment')
+const { Post, Comment } = require('./models')
 
 let credentials
-if (fs.existsSync(path.resolve(__dirname, './', 'credentials.js'))) {
-    credentials = require('./credentials')
+if (fs.existsSync(path.resolve(__dirname, '../', 'credentials.js'))) {
+    credentials = require('../credentials')
 }
 else {
-    credentials = require('./credentials~')
+    credentials = require('../credentials~')
 }
 
 if (!credentials.mongo) {
@@ -41,11 +40,12 @@ module.exports = {
     updatePost: async (options = {}, update = {}) => Post.updateOne(options, update),
     deletePost: async (options = {}) => Post.deleteOne(options),
     getCommentList: async (options = {}) => Comment.find(options),
-    saveComment: async (data) => {
+    saveComment: async (data, postId) => {
         const newComment = new Comment({
             _id: new mongoose.Types.ObjectId,
             author: data.author,
-            comment: data.comment
+            comment: data.comment,
+            post: postId
         })
         newComment.save()
 
@@ -62,5 +62,6 @@ module.exports = {
         await Comment.deleteOne(options)
 
         return previousComment
-    }
+    },
+    deleteComments: async (options = {}) => Comment.deleteMany(options)
 }
