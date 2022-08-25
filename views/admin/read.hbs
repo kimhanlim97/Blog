@@ -4,8 +4,8 @@
 <h1>Title: {{post.title}}</h1>
 <p>Author: {{post.author}}</p>
 <p>Main Text: {{post.mainText}}</p>
-<p><a href="/admin/update/{{post.id}}">update</a></p>
-<form action="/admin/delete" method="POST">
+<p><a href="/update/{{post.id}}">update</a></p>
+<form action="/delete" method="POST">
     <input type="hidden" name="postId" value="{{post.id}}">
     <input type="submit" value="delete">
 </form>
