@@ -4,7 +4,7 @@
 <h1>Title: {{post.title}}</h1>
 <p>Author: {{post.author}}</p>
 <p>Main Text: {{post.mainText}}</p>
-<p><a href="/update/{{post.id}}">update</a></p>
+<p><a href="/write?id={{post.id}}">update</a></p>
 <form action="/delete" method="POST">
     <input type="hidden" name="postId" value="{{post.id}}">
     <input type="submit" value="delete">
@@ -15,7 +15,7 @@
         <li>
             <p>
                 {{author}}: {{comment}}
-                <form action="/read/{{../post.id}}/deleteComment/{{id}}" method="post" style="display: inline;">
+                <form action="/{{../post.id}}/delete-comment?id={{id}}" method="post" style="display: inline;">
                     <input type="submit" value="삭제하기">
                 </form>
             </p>

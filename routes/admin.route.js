@@ -14,20 +14,16 @@ adminRouter.post('/logout', auth.logout)
 
 adminRouter.use(auth.check)
 
-adminRouter.get('/', post.adminGetList)
+adminRouter.get('/', post.getList)
 
-adminRouter.get('/read/:postId', post.adminGet)
+adminRouter.get('/write', post.getWritePage)
 
-adminRouter.get('/write', post.getCreatePage)
-
-adminRouter.post('/write', post.create)
-
-adminRouter.get('/update/:postId', post.getUpdatePage)
-
-adminRouter.post('/update/:postId', post.update)
+adminRouter.post('/write', post.write)
 
 adminRouter.post('/delete', post.delete)
 
-adminRouter.post('/read/:postId/deleteComment/:commentId', comment.delete)
+adminRouter.get('/:postId', post.get)
+
+adminRouter.post('/:postId/delete-comment', comment.delete)
 
 module.exports = adminRouter

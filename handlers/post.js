@@ -13,8 +13,9 @@ module.exports = {
                 return postForView
             })
         }
-    
-        res.render('user/home', context)
+        
+        if (req.hostname.includes('admin')) res.render('admin/home', context)
+        else res.render('user/home', context)
     },
     get: async (req, res) => {
         const postId = req.params.postId
@@ -38,8 +39,9 @@ module.exports = {
                 return commentForView
             })
         }
-    
-        res.render('user/read', context)
+
+        if (req.hostname.includes('admin')) res.render('admin/read', context)
+        else res.render('user/read', context)
     },
     adminGetList: async (req, res) => {
         const postList = await db.getPostList()
@@ -81,39 +83,39 @@ module.exports = {
     
         res.render('admin/read', context)
     },
-    getCreatePage: (req, res) => {
+    getWritePage: async (req, res) => {
+        const postId = req.query.id
+
+        if (postId) {
+            const post = await db.getPost({ _id: postId })
+        
+            const context = {
+                post: {
+                    id: post._id,
+                    title: post.title,
+                    author: post.author,
+                    mainText: post.mainText
+                }
+            }
+        
+            res.render('admin/update', context)
+        }
+
         res.render('admin/write')
     },
-    create: async (req, res) => {
+    write: async (req, res) => {
+        const postId = req.query.id
         const post = req.body
+
+        if (postId) {
+            await db.updatePost({_id: postId}, post)
+            
+            res.redirect(303, `/${postId}`)
+        }else {
+            await db.savePost(post)
     
-        await db.savePost(post)
-    
-        res.redirect(303, '/')
-    },
-    getUpdatePage: async (req, res) => {
-        const postId = req.params.postId
-    
-        const post = await db.getPost({ _id: postId })
-        
-        const context = {
-            post: {
-                id: post._id,
-                title: post.title,
-                author: post.author,
-                mainText: post.mainText
-            }
+            res.redirect(303, '/')
         }
-    
-        res.render('admin/update', context)
-    },
-    update: async (req, res) => {
-        const postId = req.params.postId
-        const updatedPost = req.body
-    
-        await db.updatePost({_id: postId}, updatedPost)
-        
-        res.redirect(303, `/read/${postId}`)
     },
     delete: async (req, res) => {
         const postId = req.body.postId

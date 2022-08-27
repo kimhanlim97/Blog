@@ -48,7 +48,7 @@ module.exports = {
             subject: post.title,
             state: '생성',
             comment: comment.comment,
-            url: 'http://' + req.hostname + ':' + port + `/read/${postId}` 
+            url: 'http://' + req.hostname + ':' + port + `/${postId}` 
         }
     
         res.render('email/emailTemplate', emailContext, (err, html) => {
@@ -56,12 +56,12 @@ module.exports = {
             
             sendEmail(`${post.title}에 변동사항이 있습니다`, html)
     
-            res.redirect(303, `/read/${postId}`)
+            res.redirect(303, `/${postId}`)
         })
     },
     getUpdatePage: async (req, res) => {
         const postId = req.params.postId
-        const updateCommentId = req.params.commentId
+        const updateCommentId = req.query.id
     
         const post = await db.getPost({ _id: postId })
         const commentList = await db.getCommentList({ postId: postId })
@@ -90,7 +90,7 @@ module.exports = {
     },
     update: async(req, res) => {
         const postId = req.params.postId
-        const commentId = req.params.commentId
+        const commentId = req.query.id
         const updatedComment = req.body
     
         const post = await db.getPost({ _id: postId })
@@ -102,19 +102,19 @@ module.exports = {
             state: '수정',
             comment: previousComment.comment,
             updatedComment: updatedComment.comment,
-            url: 'http://' + req.hostname + ':' + port + `/read/${postId}`
+            url: 'http://' + req.hostname + ':' + port + `/${postId}`
         }
     
         res.render('email/emailTemplate', emailContext, (err, html) => {
             if (err) console.log(err)
             
             sendEmail(`${post.title}에 변동사항이 있습니다`, html)
-            res.redirect(303, `/read/${postId}`)
+            res.redirect(303, `/${postId}`)
         })
     },
     delete: async (req, res) => {
         const postId = req.params.postId
-        const commentId = req.params.commentId
+        const commentId = req.query.id
     
         const post = await db.getPost({ _id: postId })
         const previousComment = db.getPreviousDeleteComment({ _id: commentId })
@@ -124,14 +124,14 @@ module.exports = {
             subject: post.title,
             state: '삭제',
             comment: previousComment.comment,
-            url: 'http://' + req.hostname + ':' + port + `/read/${req.params.postId}`
+            url: 'http://' + req.hostname + ':' + port + `/${req.params.postId}`
         }
     
         res.render('email/emailTemplate', emailContext, (err, html) => {
             if (err) console.log(err)
     
             sendEmail(`${post.title}에 변동사항이 있습니다`, html)
-            res.redirect(303, `/read/${postId}`)
+            res.redirect(303, `/${postId}`)
         })
     }
 }
