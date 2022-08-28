@@ -1,3 +1,5 @@
+const https = require('https')
+const fs = require('fs')
 const express = require('express')
 const expressHandlebars = require('express-handlebars')
 const bodyParser = require('body-parser')
@@ -10,7 +12,6 @@ const router = require('./routes/route')
 const adminRouter = require('./routes/admin.route')
 
 const app = express()
-const port = process.env.PORT || 3000
 
 // static middleware
 app.use(express.static(__dirname + '/public'))
@@ -44,11 +45,12 @@ app.use((err, req, res, next) => {
     res.render('error/500')
 })
 /* eslint-disable no-unused-vars */
-
-if (require.main === module) {
-    app.listen(port, () => {
-        console.log(`Express start on http://localhost:${port}`)
-    })
-} else {
-    module.exports = app
+const options = {
+    key: fs.readFileSync(__dirname + '/ssl/blog.pem'),
+    cert: fs.readFileSync(__dirname + '/ssl/blog.crt')
 }
+
+const port = process.env.PORT || 3000
+https.createServer(options, app).listen(port, () => {
+    console.log(`Express start on port ${port}`)
+})
