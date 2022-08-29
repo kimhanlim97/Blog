@@ -16,7 +16,7 @@ const adminRouter = require('./routes/admin.route')
 const app = express()
 
 // static middleware
-app.use(express.static(__dirname + '/public'))
+app.use('/static', express.static('public'))
 
 // handlebars view engine
 app.engine('.hbs', expressHandlebars.engine({
@@ -56,6 +56,10 @@ const options = {
 }
 
 const port = process.env.PORT || 3000
-https.createServer(options, app).listen(port, () => {
-    console.log(`Express start on port ${port}`)
+// https.createServer(options, app).listen(port, () => {
+//     console.log(`Express start on port ${port}`)
+// })
+
+app.listen(port, () => {
+    console.log(`Express start on ${port}`)
 })

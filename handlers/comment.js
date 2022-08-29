@@ -56,7 +56,7 @@ module.exports = {
             
             sendEmail(`${post.title}에 변동사항이 있습니다`, html)
     
-            res.redirect(303, `/${postId}`)
+            res.redirect(303, `/post/${postId}`)
         })
     },
     getUpdatePage: async (req, res) => {
@@ -109,7 +109,7 @@ module.exports = {
             if (err) console.log(err)
             
             sendEmail(`${post.title}에 변동사항이 있습니다`, html)
-            res.redirect(303, `/${postId}`)
+            res.redirect(303, `/post/${postId}`)
         })
     },
     delete: async (req, res) => {
@@ -131,7 +131,7 @@ module.exports = {
             if (err) console.log(err)
     
             sendEmail(`${post.title}에 변동사항이 있습니다`, html)
-            res.redirect(303, `/${postId}`)
+            res.redirect(303, `/post/${postId}`)
         })
     }
 }

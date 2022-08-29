@@ -20,10 +20,10 @@ adminRouter.get('/write', post.getWritePage)
 
 adminRouter.post('/write', post.write)
 
-adminRouter.post('/delete', post.delete)
+adminRouter.post('/post/delete', post.delete)
 
-adminRouter.get('/:postId', post.get)
+adminRouter.get('/post/:postId', post.get)
 
-adminRouter.post('/:postId/delete-comment', comment.delete)
+adminRouter.post('/post/:postId/delete-comment', comment.delete)
 
 module.exports = adminRouter

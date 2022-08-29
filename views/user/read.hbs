@@ -3,7 +3,7 @@
 <p>Main Text: {{post.mainText}}</p>
 
 
-<form action="/{{post.id}}/create-comment" method="post">
+<form action="/post/{{post.id}}/create-comment" method="post">
     <input type="hidden" name="_csrf" value="{{_csrfToken}}">
     <div>
         <input type="text" name="author" placeholder="작성자를 입력하세요">
@@ -17,8 +17,8 @@
         <li>
             <p>
                 {{author}}: {{comment}}   
-                <a href="/{{../post.id}}/update-comment?id={{id}}">수정하기</a>
-                <form action="/{{../post.id}}/delete-comment?id={{id}}" method="post" style="display: inline;">
+                <a href="/post/{{../post.id}}/update-comment?id={{id}}">수정하기</a>
+                <form action="/post/{{../post.id}}/delete-comment?id={{id}}" method="post" style="display: inline;">
                     <input type="hidden" name="_csrf" value="{{../_csrfToken}}">
                     <input type="submit" value="삭제하기">
                 </form>

@@ -6,14 +6,14 @@ const comment = require('../handlers/comment')
 
 router.get('/', post.getList)
 
-router.get('/:postId', post.get)
+router.get('/post/:postId', post.get)
 
-router.post('/:postId/create-comment', comment.create)
+router.post('/post/:postId/create-comment', comment.create)
 
-router.get('/:postId/update-comment', comment.getUpdatePage)
+router.get('/post/:postId/update-comment', comment.getUpdatePage)
 
-router.post('/:postId/update-comment', comment.update)
+router.post('/post/:postId/update-comment', comment.update)
 
-router.post('/:postId/delete-comment', comment.delete)
+router.post('/post/:postId/delete-comment', comment.delete)
 
 module.exports = router
