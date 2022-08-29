@@ -6,6 +6,7 @@
 <p>Main Text: {{post.mainText}}</p>
 <p><a href="/write?id={{post.id}}">update</a></p>
 <form action="/delete" method="POST">
+    <input type="hidden" name="_csrf" value="{{_csrfToken}}">
     <input type="hidden" name="postId" value="{{post.id}}">
     <input type="submit" value="delete">
 </form>
@@ -16,6 +17,7 @@
             <p>
                 {{author}}: {{comment}}
                 <form action="/{{../post.id}}/delete-comment?id={{id}}" method="post" style="display: inline;">
+                    <input type="hidden" name="_csrf" value="{{_csrfToken}}">
                     <input type="submit" value="삭제하기">
                 </form>
             </p>

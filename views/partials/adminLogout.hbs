@@ -1,3 +1,4 @@
 <form action="/logout" method="post">
+    <input type="hidden" name="_csrf" value="{{_csrfToken}}">
     <input type="submit" value="관리자 모드 나가기">
 </form>

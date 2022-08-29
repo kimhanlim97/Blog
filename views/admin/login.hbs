@@ -1,4 +1,5 @@
 <form action="/login" method="POST">
+    <input type="hidden" name="_csrf" value="{{_csrfToken}}">
     <p>
         <input type="text" name="adminId" placeholder="ID">
     </p>

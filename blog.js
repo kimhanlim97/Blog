@@ -6,8 +6,10 @@ const bodyParser = require('body-parser')
 const cookieParser = require('cookie-parser')
 const expressSession = require('express-session')
 const vhost = require('vhost')
+const csrf = require('csurf')
 
 const flashMiddleware = require('./middleware/flash')
+const csrfMiddleware = require('./middleware/csrf')
 const router = require('./routes/route')
 const adminRouter = require('./routes/admin.route')
 
@@ -31,8 +33,11 @@ app.use(expressSession({
     saveUninitialized: false,
     secret: 'secret',
 }))
+app.use(csrf({cookie: true}))
 
 app.use(flashMiddleware)
+app.use(csrfMiddleware)
+
 app.use(vhost('admin.blog.local', adminRouter))
 app.use(router)
 

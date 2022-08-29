@@ -2,6 +2,7 @@
     {{> adminLogout}}
 {{/if}}
 <form action="/write" method="POST">
+    <input type="hidden" name="_csrf" value="{{_csrfToken}}">
     <p>
         <label for="title">Title</label>
         <input type="text" id="title" name="title" placeholder="title">
@@ -14,5 +15,5 @@
         <label for="main-text">Main Text</label>
         <textarea id="main-text" name="mainText" cols="30" rows="10">Main Text</textarea>
     </p>    
-    <input type="submit">
+    <input type="submit" value="완료">
 </form>
