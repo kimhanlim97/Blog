@@ -15,10 +15,27 @@ const commentSchema = mongoose.Schema({
     _id: mongoose.Schema.Types.ObjectId,
 })
 
+const userSchema = mongoose.Schema({
+    authorId: String,
+    id: String,
+    password: String,
+    role: String,
+    name: String
+})
+
 const Post = mongoose.model('Post', postSchema)
 const Comment = mongoose.model('Comment', commentSchema)
+const User = mongoose.model('User', userSchema)
+
+// new User({
+//     authorId: 'admin: rlagksfla123',
+//     password: 'khlm8107',
+//     role: 'admin',
+//     name: '글쓴이'
+// }).save()
 
 module.exports = {
     Post,
-    Comment
+    Comment,
+    User
 }

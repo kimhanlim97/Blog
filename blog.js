@@ -7,6 +7,7 @@ const cookieParser = require('cookie-parser')
 const expressSession = require('express-session')
 const vhost = require('vhost')
 const csrf = require('csurf')
+const passport = require('passport')
 
 const flashMiddleware = require('./middleware/flash')
 const csrfMiddleware = require('./middleware/csrf')
@@ -33,6 +34,8 @@ app.use(expressSession({
     saveUninitialized: false,
     secret: 'secret',
 }))
+app.use(passport.initialize())
+app.use(passport.session())
 app.use(csrf({cookie: true}))
 
 app.use(flashMiddleware)

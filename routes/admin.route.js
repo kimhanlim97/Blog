@@ -5,14 +5,13 @@ const post = require('../handlers/post')
 const comment = require('../handlers/comment')
 const auth = require('../handlers/auth')
 
-
 adminRouter.get('/login', auth.getLoginPage)
 
-adminRouter.post('/login', auth.login)
+adminRouter.post('/login', auth.adminAuthN)
 
 adminRouter.post('/logout', auth.logout)
 
-adminRouter.use(auth.check)
+adminRouter.use(auth.adminAuthZ)
 
 adminRouter.get('/', post.getList)
 

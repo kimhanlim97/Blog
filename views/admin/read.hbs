@@ -17,7 +17,7 @@
             <p>
                 {{author}}: {{comment}}
                 <form action="/post/{{../post.id}}/delete-comment?id={{id}}" method="post" style="display: inline;">
-                    <input type="hidden" name="_csrf" value="{{_csrfToken}}">
+                    <input type="hidden" name="_csrf" value="{{../_csrfToken}}">
                     <input type="submit" value="삭제하기">
                 </form>
             </p>

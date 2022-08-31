@@ -2,7 +2,7 @@ const mongoose = require('mongoose')
 const fs = require('fs')
 const path = require('path')
 
-const { Post, Comment } = require('./models')
+const { Post, Comment, User } = require('./models')
 
 let credentials
 if (fs.existsSync(path.resolve(__dirname, '../', 'credentials.js'))) {
@@ -63,5 +63,6 @@ module.exports = {
 
         return previousComment
     },
-    deleteComments: async (options = {}) => Comment.deleteMany(options)
+    deleteComments: async (options = {}) => Comment.deleteMany(options),
+    getUserByAuthId: async authId => User.findOne({authId})
 }
