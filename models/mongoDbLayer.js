@@ -2,7 +2,7 @@ const mongoose = require('mongoose')
 const fs = require('fs')
 const path = require('path')
 
-const { Post, Comment, User } = require('./models')
+const { Post, Comment, User, Category } = require('./models')
 
 let credentials
 if (fs.existsSync(path.resolve(__dirname, '../', 'credentials.js'))) {

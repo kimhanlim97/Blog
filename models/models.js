@@ -1,11 +1,21 @@
 const mongoose = require('mongoose')
 
+const categorySchema = mongoose.Schema({
+    id: mongoose.Schema.Types.ObjectId,
+    category:  String,
+})
+
 const postSchema = mongoose.Schema({
+    // new Schema
+    id: mongoose.Schema.Types.ObjectId,
+    category: { type: mongoose.Schema.Types.ObjectId, ref: 'category' },
+    url: {type: String, unique: true},
+    main: Object,
+    // old Schema
     title: {type: String, required: true},
     author: String,
     mainText: String,
     comments: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Comment' }],
-    id: mongoose.Schema.Types.ObjectId,
 })
 
 const commentSchema = mongoose.Schema({
@@ -23,6 +33,7 @@ const userSchema = mongoose.Schema({
     name: String
 })
 
+const Category = mongoose.model('Category', categorySchema)
 const Post = mongoose.model('Post', postSchema)
 const Comment = mongoose.model('Comment', commentSchema)
 const User = mongoose.model('User', userSchema)
@@ -35,6 +46,7 @@ const User = mongoose.model('User', userSchema)
 // }).save()
 
 module.exports = {
+    Category,
     Post,
     Comment,
     User
