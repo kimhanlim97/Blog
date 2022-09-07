@@ -32,9 +32,9 @@ module.exports = {
     getPost: async (options = {}) => await Post.findOne(options).populate('comments'),
     savePost: async (data) => {
         const newPost = new Post({
-            title: data.title,
-            author: data.author,
-            mainText: data.mainText
+            category: data.category,
+            url: data.url,
+            main: data.main
         }).save()
     },
     updatePost: async (options = {}, update = {}) => Post.updateOne(options, update),
@@ -64,5 +64,36 @@ module.exports = {
         return previousComment
     },
     deleteComments: async (options = {}) => Comment.deleteMany(options),
-    getUserByAuthId: async authId => User.findOne({authId})
+    getUserByAuthId: async authId => User.findOne({authId}),
+    getCategoryList: async () => {
+        const categoryList = await Category.find()
+            .then(category => {
+                let categoryList = []
+                category.forEach(item => {
+                    categoryList.push(item.category)
+                })
+                return categoryList
+            })
+            .catch(err => console.error(err))
+            
+        return categoryList
+    },
+    isInCategory: async (inputCategory) => {
+        try {
+            const matchCategory = await Category.find({ category: inputCategory })
+            if (matchCategory[0] === undefined) return false
+            else return true
+        } catch (err) {
+            console.error(err)
+        }
+    },
+    isInURL: async (inputURL) => {
+        try {
+            const matchURL = await Post.find({ url: inputURL })
+            if (matchURL[0] === undefined) return false
+            else return true
+        } catch (err) {
+            console.error(err)
+        }
+    }
 }

@@ -1,0 +1,30 @@
+input, select {
+    margin: 10px !important;
+}
+
+.write-warning {
+    font-size: small;
+    font-weight: bold;
+    color: red !important;
+    padding: 5px;
+    margin: 5px;
+}
+
+.write-editor {
+    border-top: 1px solid black;
+    margin: 10px;
+    padding: 0;
+}
+
+.write-btn {
+    margin: 10px !important;
+}
+
+.ce-block__content, 
+.ce-toolbar__content {
+    max-width: 85%;
+}
+
+.hidden {
+    display: none;
+}

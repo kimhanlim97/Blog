@@ -11,13 +11,17 @@ adminRouter.post('/login', auth.adminAuthN)
 
 adminRouter.post('/logout', auth.logout)
 
-adminRouter.use(auth.adminAuthZ)
+// adminRouter.use(auth.adminAuthZ)
 
 adminRouter.get('/', post.getList)
 
 adminRouter.get('/write', post.getWritePage)
 
-adminRouter.post('/write', post.write)
+adminRouter.post('/write/check-category', post.validateCategory)
+
+adminRouter.post('/write/check-url', post.validateURL)
+
+adminRouter.post('/write', post.validateWrite, post.write)
 
 adminRouter.post('/post/delete', post.delete)
 
