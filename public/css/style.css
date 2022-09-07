@@ -1,3 +1,7 @@
+.body {
+    height: 100%
+}
+
 input, select {
     margin: 10px !important;
 }
@@ -27,4 +31,40 @@ input, select {
 
 .hidden {
     display: none;
+}
+
+.alert-background {
+    display: none;
+    position: absolute;
+    top: 0;
+    z-index: 100;
+    width: 100%;
+    height: 100%;
+    background-color: rgb(125, 124, 124, 0.8);
+    text-align: center;
+}
+
+.alert-box {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    padding: 20px;
+    border-radius: 7px;
+    background-color: rgb(244, 67, 54);
+    color: white;
+}
+
+.alert-box-intro {
+    margin-top: 20px;
+}
+
+.alert-box-msg {
+    margin-top: 10px;
+}
+
+.btn {
+    padding: 15px 32px;
+    color: white;
+
 }

@@ -119,12 +119,14 @@ $submitBtn.addEventListener('click', () => {
             const response = JSON.parse(xhr.responseText)
 
             if (response.type === 'category validation fail') {
-                alert(response.intro)
-                alert(response.message)
+                alertWarning(response)
+                // alert(response.intro)
+                // alert(response.message)
             }
             else if (response.type === 'url validation fail') {
-                alert(response.intro)
-                alert(response.message)
+                alertWarning(response)
+                // alert(response.intro)
+                // alert(response.message)
             }
 
             console.log(response)
